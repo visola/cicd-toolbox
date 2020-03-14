@@ -13,7 +13,7 @@ func generateErrorFrom(url string, response *http.Response) error {
 
 	bodyData, _ := ioutil.ReadAll(response.Body)
 	if len(bodyData) >= 0 {
-		errorMessage = fmt.Sprintf("%s\nBody:\n%s\n", errorMessage, string(bodyData))
+		errorMessage = fmt.Sprintf("%s\n-- Body --\n%s\n----------\n", errorMessage, string(bodyData))
 	}
 
 	return errors.New(errorMessage)

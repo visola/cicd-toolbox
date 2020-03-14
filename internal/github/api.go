@@ -7,12 +7,14 @@ import (
 	"net/http"
 )
 
-// FetchReferencesMatching fetches all references matching the passed in string for a specific
-// GitHub slug
-func FetchReferencesMatching(gitHubSlug string, matching string) ([]Reference, error) {
+// GitHubAPIV3BaseURL Base URL for the GitHub API V3
+const GitHubAPIV3BaseURL = "https://api.github.com"
+
+// FetchTags fetches all tags from a GitHub slug
+func FetchTags(gitHubSlug string) ([]Reference, error) {
 	allReferences := make([]Reference, 0)
 
-	url := fmt.Sprintf("%s/repos/%s/git/matching-refs/%s", GitHubAPIV3BaseURL, gitHubSlug, matching)
+	url := fmt.Sprintf("%s/repos/%s/git/refs/tags", GitHubAPIV3BaseURL, gitHubSlug)
 	request, requestErr := http.NewRequest(http.MethodGet, url, nil)
 	if requestErr != nil {
 		return allReferences, requestErr
@@ -46,9 +48,4 @@ func FetchReferencesMatching(gitHubSlug string, matching string) ([]Reference, e
 	allReferences = append(allReferences, references...)
 
 	return allReferences, nil
-}
-
-// FetchTags fetches all tags from a GitHub slug
-func FetchTags(gitHubSlug string) ([]Reference, error) {
-	return FetchReferencesMatching(gitHubSlug, "tags")
 }

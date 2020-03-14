@@ -2,6 +2,9 @@ package github
 
 import "strings"
 
+// ReferenceTagPrefix References that have this prefix are tags
+const ReferenceTagPrefix = "refs/tags/"
+
 // Reference represents a reference to an object in the GitHub Git Database
 // https://developer.github.com/v3/git/
 type Reference struct {

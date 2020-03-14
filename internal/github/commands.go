@@ -2,6 +2,7 @@ package github
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -31,7 +32,7 @@ func createListTagsCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			tags, err := FetchTags(args[0])
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 
 			fmt.Printf("%d tags found:\n", len(tags))

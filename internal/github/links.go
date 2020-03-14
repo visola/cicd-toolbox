@@ -24,7 +24,7 @@ func ParseLinks(headerValue string) []Link {
 	linkTexts := strings.Split(headerValue, ",")
 	for _, linkText := range linkTexts {
 		parts := linkFormat.FindStringSubmatch(linkText)
-		links = append(links, Link{URL: parts[0], Relation: parts[1]})
+		links = append(links, Link{URL: parts[1], Relation: parts[2]})
 	}
 
 	return links

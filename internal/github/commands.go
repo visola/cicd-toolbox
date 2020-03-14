@@ -10,6 +10,8 @@ var (
 	githubToken string
 )
 
+// CreateGitHubCommand creates the root GitHub command where all other GitHub
+// related commands will be added to.
 func CreateGitHubCommand() *cobra.Command {
 	gitHubCommand := &cobra.Command{
 		Use:   "github",

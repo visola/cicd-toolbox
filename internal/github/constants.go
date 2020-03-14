@@ -1,7 +1,9 @@
 package github
 
 const (
-	GITHUB_API_V3_BASE = "https://api.github.com"
+	// GitHubAPIV3BaseURL Base URL for the GitHub API V3
+	GitHubAPIV3BaseURL = "https://api.github.com"
 
-	REFERENCE_TAG_PREFIX = "refs/tags/"
+	// ReferenceTagPrefix References that have this prefix are tags
+	ReferenceTagPrefix = "refs/tags/"
 )

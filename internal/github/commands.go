@@ -19,10 +19,35 @@ func CreateGitHubCommand() *cobra.Command {
 		Short: "All commands related to GitHub",
 	}
 
-	gitHubCommand.PersistentFlags().StringVarP(&githubToken, "github-token", "t", "", "GitHub API Token")
+	gitHubCommand.PersistentFlags().StringVarP(&githubToken, "github-token", "", "", "GitHub API Token")
 
+	gitHubCommand.AddCommand(createListCommitsCommand())
 	gitHubCommand.AddCommand(createListTagsCommand())
 	return gitHubCommand
+}
+
+func createListCommitsCommand() *cobra.Command {
+	listCommitsCommand := &cobra.Command{
+		Use:   "list-commits {GITHUB_SLUG} {BEFORE_SHA}",
+		Short: "Fetch all commits before the specified SHA for a repo",
+		Args:  cobra.ExactArgs(2),
+		Run: func(cmd *cobra.Command, args []string) {
+			commits, err := FetchCommits(args[0], args[1])
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			fmt.Printf("%d commits found:\n", len(commits))
+			for _, commit := range commits {
+				fmt.Printf("-- %s --\n", commit.SHA)
+				fmt.Println(commit.Commit.Message)
+				fmt.Println("----------------------------------------------")
+				fmt.Println()
+			}
+		},
+	}
+
+	return listCommitsCommand
 }
 
 func createListTagsCommand() *cobra.Command {

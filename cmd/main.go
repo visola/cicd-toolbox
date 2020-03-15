@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/VinnieApps/cicd-tools/internal/github"
+	"github.com/VinnieApps/cicd-tools/internal/semver"
 	"github.com/spf13/cobra"
 )
 
@@ -13,5 +14,6 @@ func main() {
 	}
 
 	rootCommand.AddCommand(github.CreateGitHubCommand())
+	rootCommand.AddCommand(semver.CreateSemVerCommand())
 	rootCommand.Execute()
 }

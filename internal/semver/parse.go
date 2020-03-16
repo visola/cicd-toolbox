@@ -8,16 +8,16 @@ import (
 
 var semVerFormat = regexp.MustCompile("v?(\\d+)\\.(\\d+)\\.(\\d+)")
 
-// SemVer represents a semantic version
-type SemVer struct {
+// Version represents a semantic version
+type Version struct {
 	Major int
 	Minor int
 	Patch int
 }
 
-// Parse parses a string to a SemVer
-func Parse(toParse string) (SemVer, error) {
-	version := SemVer{}
+// Parse parses a string to a Version
+func Parse(toParse string) (Version, error) {
+	version := Version{}
 
 	if !semVerFormat.MatchString(toParse) {
 		return version, fmt.Errorf("Invalid SemVer format: %s", toParse)

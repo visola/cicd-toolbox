@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	githubToken string
+	// GitHubToken stores the token to be used to authenticate with GitHub
+	GitHubToken string
 )
 
 // CreateGitHubCommand creates the root GitHub command where all other GitHub
@@ -19,7 +20,7 @@ func CreateGitHubCommand() *cobra.Command {
 		Short: "All commands related to GitHub",
 	}
 
-	gitHubCommand.PersistentFlags().StringVarP(&githubToken, "github-token", "", "", "GitHub API Token")
+	gitHubCommand.PersistentFlags().StringVarP(&GitHubToken, "github-token", "", "", "GitHub API Token")
 
 	gitHubCommand.AddCommand(createListCommitsCommand())
 	gitHubCommand.AddCommand(createListTagsCommand())
@@ -28,8 +29,8 @@ func CreateGitHubCommand() *cobra.Command {
 
 func createListCommitsCommand() *cobra.Command {
 	listCommitsCommand := &cobra.Command{
-		Use:   "list-commits {GITHUB_SLUG} {BEFORE_SHA}",
-		Short: "Fetch all commits before the specified SHA for a repo",
+		Use:   "list-commits {GITHUB_SLUG} {AFTER_SHA}",
+		Short: "Fetch all commits after the specified SHA for a repo",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			commits, err := FetchCommits(args[0], args[1])

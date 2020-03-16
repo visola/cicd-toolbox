@@ -10,8 +10,8 @@ import (
 // GitHubAPIV3BaseURL Base URL for the GitHub API V3
 const GitHubAPIV3BaseURL = "https://api.github.com"
 
-// FetchCommits fetches all commits before a specified SHA for a repository
-func FetchCommits(gitHubSlug string, beforeSha string) ([]Commit, error) {
+// FetchCommits fetches all commits after a specified SHA for a repository
+func FetchCommits(gitHubSlug string, afterSha string) ([]Commit, error) {
 	allCommits := make([]Commit, 0)
 
 	url := fmt.Sprintf("%s/repos/%s/commits", GitHubAPIV3BaseURL, gitHubSlug)
@@ -44,7 +44,7 @@ FetchLoop:
 		}
 
 		for _, commit := range commits {
-			if commit.SHA == beforeSha {
+			if commit.SHA == afterSha {
 				break FetchLoop
 			}
 			allCommits = append(allCommits, commit)
@@ -104,8 +104,8 @@ func createGitHubRequest(url string) (*http.Request, error) {
 		return request, requestErr
 	}
 
-	if githubToken != "" {
-		request.Header.Add("Authorization", fmt.Sprintf("token %s", githubToken))
+	if GitHubToken != "" {
+		request.Header.Add("Authorization", fmt.Sprintf("token %s", GitHubToken))
 	}
 
 	return request, nil

@@ -15,6 +15,10 @@ type Version struct {
 	Patch int
 }
 
+func (v Version) String() string {
+	return fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Patch)
+}
+
 // Parse parses a string to a Version
 func Parse(toParse string) (Version, error) {
 	version := Version{}

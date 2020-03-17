@@ -78,6 +78,10 @@ func FetchTags(gitHubSlug string) ([]Reference, error) {
 		return allReferences, err
 	}
 
+	if response.StatusCode == http.StatusNotFound {
+		return allReferences, nil
+	}
+
 	if response.StatusCode != http.StatusOK {
 		return allReferences, generateErrorFrom(url, response)
 	}

@@ -53,8 +53,9 @@ func createListCommitsCommand() *cobra.Command {
 
 func createListTagsCommand() *cobra.Command {
 	listTagsCommand := &cobra.Command{
-		Use:  "list-tags {GITHUB_SLUG}",
-		Args: cobra.ExactArgs(1),
+		Use:   "list-tags {GITHUB_SLUG}",
+		Short: "Fetch all tags for a repo",
+		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			tags, err := FetchTags(args[0])
 			if err != nil {

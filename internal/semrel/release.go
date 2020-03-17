@@ -1,7 +1,7 @@
 package semrel
 
 import (
-	"github.com/VinnieApps/cicd-tools/internal/github"
+	"github.com/VinnieApps/cicd-tools/internal/git"
 	"github.com/VinnieApps/cicd-tools/internal/semver"
 )
 
@@ -13,7 +13,7 @@ type Release struct {
 
 // CalculateNextRelease will calculate what will go out in the next release,
 // and if it is a major, minor or patch change.
-func CalculateNextRelease(latestVersion semver.Version, commits []github.Commit) (Release, error) {
+func CalculateNextRelease(latestVersion semver.Version, commits []git.Commit) (Release, error) {
 	release := Release{}
 
 	release.Version = semver.Version{

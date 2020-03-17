@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/VinnieApps/cicd-tools/internal/git"
 	"github.com/VinnieApps/cicd-tools/internal/github"
 	"github.com/VinnieApps/cicd-tools/internal/semver"
 	"github.com/spf13/cobra"
@@ -35,14 +36,23 @@ func createVersionFileCommand() *cobra.Command {
 				log.Fatal(tagsErr)
 			}
 
-			latestTag := tags[len(tags)-1]
+			var latestVersion semver.Version
+			var latestVersionSha string
+			if len(tags) == 0 {
+				latestVersion = semver.Version{}
+				latestVersionSha = ""
+			} else {
+				latestTag := tags[len(tags)-1]
+				version, parseVersionErr := semver.Parse(latestTag.TagName())
+				if parseVersionErr != nil {
+					log.Fatal(parseVersionErr)
+				}
 
-			latestVersion, parseVersionErr := semver.Parse(latestTag.TagName())
-			if parseVersionErr != nil {
-				log.Fatal(parseVersionErr)
+				latestVersion = version
+				latestVersionSha = latestTag.Object.SHA
 			}
 
-			commits, commitsErr := github.FetchCommits(gitHubSlug, latestTag.Object.SHA)
+			commits, commitsErr := git.FetchCommits(".", latestVersionSha)
 			if commitsErr != nil {
 				log.Fatal(commitsErr)
 			}

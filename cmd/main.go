@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/VinnieApps/cicd-tools/internal/github"
-	"github.com/VinnieApps/cicd-tools/internal/golang"
-	"github.com/VinnieApps/cicd-tools/internal/semrel"
-	"github.com/VinnieApps/cicd-tools/internal/semver"
+	"github.com/VinnieApps/cicd-toolbox/internal/github"
+	"github.com/VinnieApps/cicd-toolbox/internal/golang"
+	"github.com/VinnieApps/cicd-toolbox/internal/semrel"
+	"github.com/VinnieApps/cicd-toolbox/internal/semver"
 	"github.com/spf13/cobra"
 )
 

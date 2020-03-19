@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/VinnieApps/cicd-tools/internal/git"
+	"github.com/VinnieApps/cicd-toolbox/internal/git"
 )
 
 var breakingChangePattern = regexp.MustCompile("BREAKING CHANGE?")

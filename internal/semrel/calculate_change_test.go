@@ -3,7 +3,7 @@ package semrel
 import (
 	"testing"
 
-	"github.com/VinnieApps/cicd-tools/internal/git"
+	"github.com/VinnieApps/cicd-toolbox/internal/git"
 	"github.com/stretchr/testify/assert"
 )
 

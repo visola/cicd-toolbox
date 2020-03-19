@@ -22,4 +22,7 @@ jobs:
         run: go build -v cmd/main.go
 
       - name: Test
-        run: go test -v ./...
+        run: go run cmd/main.go golang run-tests
+      
+      - name: Show Coverage
+        run: go tool cover -func=build/coverage/all.out

@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v2
       
       - name: Build
-        run: go run cmd/main.go golang build --os darwin --os linux --os windows -a amd64 cmd/main.go
+        run: go run cmd/main.go golang build --os darwin --os linux --os windows --arch amd64 cmd/main.go
 
       - name: Test
         run: build/binaries/amd64_linux/main golang run-tests

@@ -44,8 +44,10 @@ func createBuildCommand() *cobra.Command {
 				Platforms:       platforms,
 			}
 
-			if buildErr := buildSpec.Build(); buildErr != nil {
-				log.Fatal(buildErr)
+			if buildErrs := buildSpec.Build(); len(buildErrs) > 0 {
+				for _, err := range buildErrs {
+					log.Println(err)
+				}
 			}
 		},
 	}

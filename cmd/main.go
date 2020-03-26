@@ -16,7 +16,7 @@ func main() {
 	rootCommand := &cobra.Command{
 		Use:   "cicd",
 		Short: "Toolbox for your CI/CD processes",
-		Long:  "An unopinionated toolbox for all Continuous Integration and Deliver needs.",
+		Long:  "An unopinionated toolbox for all Continuous Integration and Delivery needs.",
 	}
 
 	rootCommand.AddCommand(github.CreateGitHubCommand())

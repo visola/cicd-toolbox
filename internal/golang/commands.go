@@ -51,7 +51,7 @@ func createBuildCommand() *cobra.Command {
 
 	buildCommand.Flags().StringVarP(&baseName, "base-name", "n", "main", "Base name for the binary")
 
-	buildCommand.Flags().StringArrayVarP(&architectures, "arch", "a", []string{}, "Architecture to compile for")
+	buildCommand.Flags().StringArrayVarP(&architectures, "arch", "", []string{}, "Architecture to compile for")
 	buildCommand.Flags().StringArrayVarP(&linkerFlags, "ldflags", "", []string{}, "Flags to pass for the linker")
 	buildCommand.Flags().StringArrayVarP(&operatingSystems, "os", "", []string{}, "Operating System to compile for")
 

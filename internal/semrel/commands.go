@@ -1,6 +1,7 @@
 package semrel
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 
@@ -20,44 +21,37 @@ func CreateSemanticReleaseCommand() *cobra.Command {
 
 	semanticReleaseCommand.PersistentFlags().StringVarP(&github.GitHubToken, "github-token", "", "", "GitHub API Token")
 
+	semanticReleaseCommand.AddCommand(createChangeLogCommand())
 	semanticReleaseCommand.AddCommand(createVersionFileCommand())
 	return semanticReleaseCommand
 }
 
+func createChangeLogCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "change-log {GITHUB_SLUG}",
+		Short: "Prints the change log containing information about what changed since the previous release",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			nextRelease, nextReleaseErr := calculateNextRelease(args[0])
+			if nextReleaseErr != nil {
+				log.Fatal(nextReleaseErr)
+			}
+
+			fmt.Println(nextRelease.ChangeLog())
+		},
+	}
+}
+
 func createVersionFileCommand() *cobra.Command {
 	return &cobra.Command{
-		Use:  "version-file {GITHUB_SLUG}",
+		Use:   "version-file {GITHUB_SLUG}",
+		Short: "Generate a version file containing the next version",
+		Long: `Generates a version file containing the next version calculated from the
+latest release from the GitHub repo specified by the slug and comparing
+the commit messages in the current (local) git repository.`,
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			gitHubSlug := args[0]
-
-			tags, tagsErr := github.FetchTags(gitHubSlug)
-			if tagsErr != nil {
-				log.Fatal(tagsErr)
-			}
-
-			var latestVersion semver.Version
-			var latestVersionSha string
-			if len(tags) == 0 {
-				latestVersion = semver.Version{}
-				latestVersionSha = ""
-			} else {
-				latestTag := tags[len(tags)-1]
-				version, parseVersionErr := semver.Parse(latestTag.TagName())
-				if parseVersionErr != nil {
-					log.Fatal(parseVersionErr)
-				}
-
-				latestVersion = version
-				latestVersionSha = latestTag.Object.SHA
-			}
-
-			commits, commitsErr := git.FetchCommits(".", latestVersionSha)
-			if commitsErr != nil {
-				log.Fatal(commitsErr)
-			}
-
-			nextRelease, nextReleaseErr := CalculateNextRelease(latestVersion, commits)
+			nextRelease, nextReleaseErr := calculateNextRelease(args[0])
 			if nextReleaseErr != nil {
 				log.Fatal(nextReleaseErr)
 			}
@@ -65,4 +59,34 @@ func createVersionFileCommand() *cobra.Command {
 			ioutil.WriteFile(".version", []byte(nextRelease.Version.String()), 0744)
 		},
 	}
+}
+
+func calculateNextRelease(gitHubSlug string) (Release, error) {
+	tags, tagsErr := github.FetchTags(gitHubSlug)
+	if tagsErr != nil {
+		log.Fatal(tagsErr)
+	}
+
+	var latestVersion semver.Version
+	var latestVersionSha string
+	if len(tags) == 0 {
+		latestVersion = semver.Version{}
+		latestVersionSha = ""
+	} else {
+		latestTag := tags[len(tags)-1]
+		version, parseVersionErr := semver.Parse(latestTag.TagName())
+		if parseVersionErr != nil {
+			log.Fatal(parseVersionErr)
+		}
+
+		latestVersion = version
+		latestVersionSha = latestTag.Object.SHA
+	}
+
+	commits, commitsErr := git.FetchCommits(".", latestVersionSha)
+	if commitsErr != nil {
+		log.Fatal(commitsErr)
+	}
+
+	return CalculateNextRelease(latestVersion, commits)
 }

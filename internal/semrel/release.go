@@ -1,7 +1,10 @@
 package semrel
 
 import (
-	"github.com/VinnieApps/cicd-toolbox/internal/git"
+	"fmt"
+	"strings"
+	"time"
+
 	"github.com/VinnieApps/cicd-toolbox/internal/semver"
 )
 
@@ -11,43 +14,42 @@ type Release struct {
 	Version semver.Version
 }
 
-// CalculateNextRelease will calculate what will go out in the next release,
-// and if it is a major, minor or patch change.
-func CalculateNextRelease(latestVersion semver.Version, commits []git.Commit) (Release, error) {
-	release := Release{}
+// ChangeLog returns a string representing the change log for the
+// release, in markdown format
+func (release Release) ChangeLog() string {
+	now := time.Now()
+	changeLog := fmt.Sprintf("## %s (%s)", release.Version, now.Format("2006-01-02"))
 
-	release.Version = semver.Version{
-		Major: latestVersion.Major,
-		Minor: latestVersion.Minor,
-		Patch: latestVersion.Patch,
+	for commitType, changes := range release.ChangesByType() {
+		changeLog = changeLog + fmt.Sprintf("\n\n#### %s%s\n", strings.ToUpper(commitType[0:1]), commitType[1:])
+
+		for _, change := range changes {
+			changeLog = changeLog + fmt.Sprintf("* %s (%s)\n", change.ParsedMessage.Subject, change.Commit.ShortSHA())
+		}
 	}
 
-	major := false
-	minor := false
+	return changeLog
+}
 
-	release.Changes = make([]Change, len(commits))
-	for i, commit := range commits {
-		change := CalculateChange(commit)
-		major = major || change.Major
-		minor = minor || change.Minor
+// ChangesByType group the changes for the release by their type
+func (release Release) ChangesByType() map[string][]Change {
+	changesByType := make(map[string][]Change)
+	for _, change := range release.Changes {
+		if change.ParsedMessage.Subject == "" {
+			continue
+		}
 
-		release.Changes[i] = change
+		commitType := change.ParsedMessage.Type
+		if commitType == "feat" {
+			commitType = "feature"
+		}
+
+		messages, exist := changesByType[commitType]
+		if !exist {
+			messages = make([]Change, 0)
+		}
+		changesByType[commitType] = append(messages, change)
 	}
 
-	if len(release.Changes) > 0 {
-		release.Version.Patch++
-	}
-
-	if minor {
-		release.Version.Minor++
-		release.Version.Patch = 0
-	}
-
-	if major {
-		release.Version.Major++
-		release.Version.Minor = 0
-		release.Version.Patch = 0
-	}
-
-	return release, nil
+	return changesByType
 }

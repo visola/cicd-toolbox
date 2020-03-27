@@ -22,8 +22,8 @@ type BuildSpecification struct {
 // Build builds the binaries using the build spec
 func (buildSpec *BuildSpecification) Build() []error {
 	parallel := runtime.NumCPU() - 1
-	if parallel <= 0 {
-		parallel = 1
+	if parallel < 0 {
+		parallel = 0
 	}
 
 	var errorLock sync.Mutex

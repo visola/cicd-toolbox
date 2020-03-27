@@ -17,12 +17,22 @@ jobs:
 
       - name: Check out code
         uses: actions/checkout@v2
-      
+        with:
+          fetch-depth: 0
+
       - name: Build
         run: go run cmd/main.go golang build --os darwin --os linux --os windows --arch amd64 cmd/main.go
 
       - name: Test
-        run: build/binaries/amd64_linux/main golang run-tests
+        run: go run cmd/main.go golang run-tests
       
       - name: Show Coverage
         run: go tool cover -func=build/coverage/all.out
+
+      - name: Calculate Next Version
+        run: |
+          go run cmd/main.go semantic-release version-file vinnieapps/cicd-toolbox
+          cat .version
+
+      - name: Change Log
+        run: go run cmd/main.go semantic-release change-log vinnieapps/cicd-toolbox

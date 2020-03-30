@@ -22,9 +22,26 @@ func CreateGitHubCommand() *cobra.Command {
 
 	gitHubCommand.PersistentFlags().StringVarP(&GitHubToken, "github-token", "", "", "GitHub API Token")
 
+	gitHubCommand.AddCommand(createCreateReleaseCommand())
 	gitHubCommand.AddCommand(createListCommitsCommand())
 	gitHubCommand.AddCommand(createListTagsCommand())
 	return gitHubCommand
+}
+
+func createCreateReleaseCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "create-release {GITHUB_SLUG}",
+		Short: "Create a release in GitHub",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			user, userErr := GetAuthenticatedUser()
+			if userErr != nil {
+				log.Fatal(userErr)
+			}
+
+			fmt.Printf("Username: %s\n", user.Login)
+		},
+	}
 }
 
 func createListCommitsCommand() *cobra.Command {

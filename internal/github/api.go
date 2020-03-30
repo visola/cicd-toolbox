@@ -14,7 +14,7 @@ const GitHubAPIV3BaseURL = "https://api.github.com"
 func FetchCommits(gitHubSlug string, afterSha string) ([]Commit, error) {
 	allCommits := make([]Commit, 0)
 
-	url := fmt.Sprintf("%s/repos/%s/commits", GitHubAPIV3BaseURL, gitHubSlug)
+	url := fmt.Sprintf("/repos/%s/commits", gitHubSlug)
 FetchLoop:
 	for true {
 		request, requestErr := createGitHubRequest(url)
@@ -66,7 +66,7 @@ FetchLoop:
 func FetchTags(gitHubSlug string) ([]Reference, error) {
 	allReferences := make([]Reference, 0)
 
-	url := fmt.Sprintf("%s/repos/%s/git/refs/tags", GitHubAPIV3BaseURL, gitHubSlug)
+	url := fmt.Sprintf("/repos/%s/git/refs/tags", gitHubSlug)
 	request, requestErr := createGitHubRequest(url)
 	if requestErr != nil {
 		return allReferences, requestErr
@@ -102,8 +102,18 @@ func FetchTags(gitHubSlug string) ([]Reference, error) {
 	return allReferences, nil
 }
 
+// GetAuthenticatedUser fetches the authenticate user from the GitHub token
+func GetAuthenticatedUser() (User, error) {
+	var user User
+	if requestErr := executeGitHubRequest("/user", &user); requestErr != nil {
+		return user, requestErr
+	}
+
+	return user, nil
+}
+
 func createGitHubRequest(url string) (*http.Request, error) {
-	request, requestErr := http.NewRequest(http.MethodGet, url, nil)
+	request, requestErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", GitHubAPIV3BaseURL, url), nil)
 	if requestErr != nil {
 		return request, requestErr
 	}
@@ -113,4 +123,28 @@ func createGitHubRequest(url string) (*http.Request, error) {
 	}
 
 	return request, nil
+}
+
+func executeGitHubRequest(url string, body interface{}) error {
+	request, requestErr := createGitHubRequest(url)
+	if requestErr != nil {
+		return requestErr
+	}
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return generateErrorFrom(url, response)
+	}
+
+	bodyData, readErr := ioutil.ReadAll(response.Body)
+	if readErr != nil {
+		return readErr
+	}
+
+	return json.Unmarshal(bodyData, &body)
 }

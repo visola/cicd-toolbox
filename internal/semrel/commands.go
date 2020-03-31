@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/VinnieApps/cicd-toolbox/internal/git"
 	"github.com/VinnieApps/cicd-toolbox/internal/github"
@@ -53,18 +54,27 @@ func createPublishReleaseCommand() *cobra.Command {
 				log.Fatal("GitHub token is required to publish a release.")
 			}
 
-			user, userErr := github.GetAuthenticatedUser()
-			if userErr != nil {
-				log.Fatal(userErr)
-			}
-			fmt.Printf("Logged in user is: %s\n", user.Login)
+			gitHubSlug := args[0]
 
 			nextRelease, nextReleaseErr := calculateNextRelease(args[0])
 			if nextReleaseErr != nil {
 				log.Fatal(nextReleaseErr)
 			}
 
-			fmt.Printf("New version is %s\n", nextRelease.Version.String())
+			if len(nextRelease.Changes) == 0 {
+				log.Printf("Nothing to release.")
+				os.Exit(1)
+			}
+
+			log.Printf("New version is %s\n", nextRelease.Version.String())
+
+			latestCommit := nextRelease.Changes[0].Commit
+			reference := fmt.Sprintf("refs/tags/v%s", nextRelease.Version.String())
+			log.Printf("Creating reference %s to commit -> %s (%s)\n", reference, latestCommit.Message, latestCommit.ShortSHA())
+
+			if refErr := github.CreateReference(gitHubSlug, reference, latestCommit.SHA); refErr != nil {
+				log.Fatal("Error while creating reference\n%v", refErr)
+			}
 		},
 	}
 }

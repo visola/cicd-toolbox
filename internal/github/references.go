@@ -1,6 +1,9 @@
 package github
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // ReferenceTagPrefix References that have this prefix are tags
 const ReferenceTagPrefix = "refs/tags/"
@@ -19,4 +22,26 @@ func (ref Reference) TagName() string {
 	}
 
 	return ""
+}
+
+type createReferenceBody struct {
+	Reference string `json:"ref"`
+	SHA       string `json:"sha"`
+}
+
+// CreateReference creates a reference in GitHub. Name should be of the format: refs/type/name
+// e.g.: refs/tag/v1.2.0
+func CreateReference(gitHubSlug, name, sha string) error {
+	ref := createReferenceBody{
+		Reference: name,
+		SHA:       sha,
+	}
+
+	createRefRequest, createRefErr := createGitHubPOSTRequest(fmt.Sprintf("/repos/%s/git/refs", gitHubSlug), ref)
+	if createRefErr != nil {
+		return createRefErr
+	}
+
+	_, err := executeRequest(createRefRequest)
+	return err
 }

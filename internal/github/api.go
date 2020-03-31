@@ -1,6 +1,7 @@
 package github
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -22,14 +23,9 @@ FetchLoop:
 			return allCommits, requestErr
 		}
 
-		client := &http.Client{}
-		response, responseErr := client.Do(request)
+		response, responseErr := executeRequest(request)
 		if responseErr != nil {
 			return allCommits, responseErr
-		}
-
-		if response.StatusCode != http.StatusOK {
-			return allCommits, generateErrorFrom(url, response)
 		}
 
 		bodyData, readErr := ioutil.ReadAll(response.Body)
@@ -102,18 +98,27 @@ func FetchTags(gitHubSlug string) ([]Reference, error) {
 	return allReferences, nil
 }
 
-// GetAuthenticatedUser fetches the authenticate user from the GitHub token
-func GetAuthenticatedUser() (User, error) {
-	var user User
-	if requestErr := executeGitHubRequest("/user", &user); requestErr != nil {
-		return user, requestErr
-	}
-
-	return user, nil
-}
-
 func createGitHubRequest(url string) (*http.Request, error) {
 	request, requestErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", GitHubAPIV3BaseURL, url), nil)
+	if requestErr != nil {
+		return request, requestErr
+	}
+
+	if GitHubToken != "" {
+		request.Header.Add("Authorization", fmt.Sprintf("token %s", GitHubToken))
+	}
+
+	return request, nil
+}
+
+func createGitHubPOSTRequest(url string, body interface{}) (*http.Request, error) {
+	bodyJSON, marshalError := json.Marshal(body)
+	if marshalError != nil {
+		return nil, marshalError
+	}
+
+	bodyReader := ioutil.NopCloser(bytes.NewReader(bodyJSON))
+	request, requestErr := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s", GitHubAPIV3BaseURL, url), bodyReader)
 	if requestErr != nil {
 		return request, requestErr
 	}
@@ -131,14 +136,9 @@ func executeGitHubRequest(url string, body interface{}) error {
 		return requestErr
 	}
 
-	client := &http.Client{}
-	response, err := client.Do(request)
-	if err != nil {
-		return err
-	}
-
-	if response.StatusCode != http.StatusOK {
-		return generateErrorFrom(url, response)
+	response, responseErr := executeRequest(request)
+	if responseErr != nil {
+		return responseErr
 	}
 
 	bodyData, readErr := ioutil.ReadAll(response.Body)
@@ -147,4 +147,18 @@ func executeGitHubRequest(url string, body interface{}) error {
 	}
 
 	return json.Unmarshal(bodyData, &body)
+}
+
+func executeRequest(request *http.Request) (*http.Response, error) {
+	client := &http.Client{}
+	response, responseErr := client.Do(request)
+	if responseErr != nil {
+		return nil, responseErr
+	}
+
+	if response.StatusCode >= http.StatusBadRequest {
+		return nil, generateErrorFrom(request.URL.String(), response)
+	}
+
+	return response, nil
 }

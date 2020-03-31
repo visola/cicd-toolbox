@@ -88,7 +88,9 @@ func createRunTestsCommand() *cobra.Command {
 				log.Fatal(readErr)
 			}
 
-			RunTestsWithCoverage(packages)
+			if err := RunTestsWithCoverage(packages); err != nil {
+				log.Fatal(err)
+			}
 		},
 	}
 }

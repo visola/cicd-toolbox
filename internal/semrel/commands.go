@@ -73,7 +73,7 @@ func createPublishReleaseCommand() *cobra.Command {
 			log.Printf("Creating reference %s to commit -> %s (%s)\n", reference, latestCommit.Message, latestCommit.ShortSHA())
 
 			if refErr := github.CreateReference(gitHubSlug, reference, latestCommit.SHA); refErr != nil {
-				log.Fatal("Error while creating reference\n%v", refErr)
+				log.Fatalf("Error while creating reference: %v", refErr.Error())
 			}
 		},
 	}

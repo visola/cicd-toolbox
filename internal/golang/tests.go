@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"go/build"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/VinnieApps/cicd-toolbox/internal/executil"
 )
 
 // RunTestsWithCoverage runs tests for all packages and generate coverage data.
@@ -28,13 +29,5 @@ func RunTestsWithCoverage(packages []*build.Package) error {
 	}
 
 	cmd := exec.Command("go", "test", "-cover", "-coverprofile=build/coverage/all.out", "./...")
-	runErr := cmd.Run()
-	if runErr != nil {
-		log.Printf("-- Tests failed --")
-		output, _ := cmd.CombinedOutput()
-		log.Println(string(output))
-		log.Fatal(runErr)
-	}
-
-	return nil
+	return executil.RunAndCaptureOutputIfError(cmd)
 }

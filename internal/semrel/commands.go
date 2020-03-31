@@ -22,6 +22,7 @@ func CreateSemanticReleaseCommand() *cobra.Command {
 	semanticReleaseCommand.PersistentFlags().StringVarP(&github.GitHubToken, "github-token", "", "", "GitHub API Token")
 
 	semanticReleaseCommand.AddCommand(createChangeLogCommand())
+	semanticReleaseCommand.AddCommand(createPublishReleaseCommand())
 	semanticReleaseCommand.AddCommand(createVersionFileCommand())
 	return semanticReleaseCommand
 }
@@ -38,6 +39,32 @@ func createChangeLogCommand() *cobra.Command {
 			}
 
 			fmt.Println(nextRelease.ChangeLog())
+		},
+	}
+}
+
+func createPublishReleaseCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "publish-release {GITHUB_SLUG}",
+		Short: "Calculates the next version and publish the release to GitHub",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			if github.GitHubToken == "" {
+				log.Fatal("GitHub token is required to publish a release.")
+			}
+
+			user, userErr := github.GetAuthenticatedUser()
+			if userErr != nil {
+				log.Fatal(userErr)
+			}
+			fmt.Printf("Logged in user is: %s\n", user.Login)
+
+			nextRelease, nextReleaseErr := calculateNextRelease(args[0])
+			if nextReleaseErr != nil {
+				log.Fatal(nextReleaseErr)
+			}
+
+			fmt.Printf("New version is %s\n", nextRelease.Version.String())
 		},
 	}
 }

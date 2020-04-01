@@ -11,6 +11,8 @@ import (
 	"github.com/VinnieApps/cicd-toolbox/internal/executil"
 )
 
+const binariesDir = "build/binaries"
+
 // BuildSpecification represents a spec to build a go binary
 type BuildSpecification struct {
 	BaseName        string
@@ -49,13 +51,18 @@ func (buildSpec *BuildSpecification) Build() []error {
 }
 
 func compileForPlatform(buildSpec BuildSpecification, platform Platform) error {
+	os.MkdirAll(binariesDir, 0744)
+
 	outFileName := "main"
 	if buildSpec.BaseName != "" {
 		outFileName = buildSpec.BaseName
 	}
 
-	buildDir := fmt.Sprintf("build/binaries/%s_%s", platform.Architecture, platform.OperatingSystem)
-	os.MkdirAll(buildDir, 0744)
+	outFileName = fmt.Sprintf("%s_%s_%s", outFileName, platform.Architecture, platform.OperatingSystem)
+
+	if platform.Extension != "" {
+		outFileName = fmt.Sprintf("%s.%s", outFileName, platform.Extension)
+	}
 
 	commandArgs := []string{"build", "-a", "-installsuffix", "cgo"}
 
@@ -63,11 +70,7 @@ func compileForPlatform(buildSpec BuildSpecification, platform Platform) error {
 		commandArgs = append(commandArgs, "-ldflags", linkerArg)
 	}
 
-	if platform.Extension != "" {
-		outFileName = fmt.Sprintf("%s.%s", outFileName, platform.Extension)
-	}
-
-	commandArgs = append(commandArgs, "-o", filepath.Join(buildDir, outFileName))
+	commandArgs = append(commandArgs, "-o", filepath.Join(binariesDir, outFileName))
 	commandArgs = append(commandArgs, buildSpec.FileToBuild)
 
 	command := exec.Command("go", commandArgs...)

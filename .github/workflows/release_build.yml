@@ -1,0 +1,30 @@
+name: Release Build
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build
+        run: go run cmd/main.go golang build --os darwin --os linux --os windows --arch amd64 cmd/main.go
+
+      - name: Test
+        run: go run cmd/main.go golang run-tests
+
+      - name: Release
+        run: go run cmd/main.go semantic-release publish-release vinnieapps/cicd-toolbox --github-token ${{ secrets.GITHUB_TOKEN }} --upload build/binaries

@@ -5,7 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"mime"
 	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
 )
 
 // GitHubAPIV3BaseURL Base URL for the GitHub API V3
@@ -122,6 +126,38 @@ func createGitHubPOSTRequest(url string, body interface{}) (*http.Request, error
 	if requestErr != nil {
 		return request, requestErr
 	}
+
+	if GitHubToken != "" {
+		request.Header.Add("Authorization", fmt.Sprintf("token %s", GitHubToken))
+	}
+
+	return request, nil
+}
+
+func createGitHubUploadRequest(assetURL string, file *os.File) (*http.Request, error) {
+	stat, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+
+	uploadURL, _ := url.Parse(assetURL)
+
+	queryString := uploadURL.Query()
+	queryString.Add("name", filepath.Base(file.Name()))
+	uploadURL.RawQuery = queryString.Encode()
+
+	request, requestErr := http.NewRequest(http.MethodPost, uploadURL.String(), file)
+	if requestErr != nil {
+		return request, requestErr
+	}
+
+	mimeType := mime.TypeByExtension(filepath.Ext(file.Name()))
+	if mimeType == "" {
+		mimeType = "application/octet-stream"
+	}
+
+	request.ContentLength = stat.Size()
+	request.Header.Set("Content-Type", mimeType)
 
 	if GitHubToken != "" {
 		request.Header.Add("Authorization", fmt.Sprintf("token %s", GitHubToken))

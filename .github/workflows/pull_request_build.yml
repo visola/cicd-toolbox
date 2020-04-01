@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Build
-        run: go run cmd/main.go golang build --os darwin --os linux --os windows --arch amd64 cmd/main.go
+        run: go run cmd/main.go golang build --base-name cicd --os darwin --os linux --os windows --arch amd64 cmd/main.go
 
       - name: Test
         run: go run cmd/main.go golang run-tests

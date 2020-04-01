@@ -69,11 +69,26 @@ func createPublishReleaseCommand() *cobra.Command {
 			log.Printf("New version is %s\n", nextRelease.Version.String())
 
 			latestCommit := nextRelease.Changes[0].Commit
-			reference := fmt.Sprintf("refs/tags/v%s", nextRelease.Version.String())
+			tagName := fmt.Sprintf("v%s", nextRelease.Version.String())
+			reference := fmt.Sprintf("refs/tags/%s", tagName)
 			log.Printf("Creating reference %s to commit -> %s (%s)\n", reference, latestCommit.Message, latestCommit.ShortSHA())
 
 			if refErr := github.CreateReference(gitHubSlug, reference, latestCommit.SHA); refErr != nil {
 				log.Fatalf("Error while creating reference: %v", refErr.Error())
+			}
+
+			log.Println("Creating release...")
+			relErr := github.CreateRelease(gitHubSlug, github.ReleaseBody{
+				Body:            nextRelease.ChangeLog(),
+				IsDraft:         false,
+				Name:            tagName,
+				PreRelease:      false,
+				TagName:         tagName,
+				TargetCommitish: latestCommit.SHA,
+			})
+
+			if relErr != nil {
+				log.Fatalf("Error while creating release: %v", relErr)
 			}
 		},
 	}

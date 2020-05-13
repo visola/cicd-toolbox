@@ -1,8 +1,5 @@
-name: Pull Request Build
-on:
-  push:
-    branches-ignore:
-      - master
+name: Release Build
+on: push
 
 jobs:
   build:
@@ -36,3 +33,7 @@ jobs:
 
       - name: Change Log
         run: go run cmd/main.go semantic-release change-log vinnieapps/cicd-toolbox
+
+      - name: Release
+        if: github.ref == 'refs/heads/master'
+        run: go run cmd/main.go semantic-release publish-release vinnieapps/cicd-toolbox --github-token ${{ secrets.GITHUB_TOKEN }} --upload build/binaries

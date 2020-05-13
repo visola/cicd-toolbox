@@ -64,7 +64,7 @@ func compileForPlatform(buildSpec BuildSpecification, platform Platform) error {
 		outFileName = fmt.Sprintf("%s.%s", outFileName, platform.Extension)
 	}
 
-	commandArgs := []string{"build", "-a", "-installsuffix", "cgo"}
+	commandArgs := []string{"build", "-installsuffix", "cgo"}
 
 	for _, linkerArg := range buildSpec.LinkerArguments {
 		commandArgs = append(commandArgs, "-ldflags", linkerArg)

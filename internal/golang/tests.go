@@ -16,10 +16,10 @@ import (
 // tests.
 func RunTestsWithCoverage(packages []*build.Package) error {
 	os.MkdirAll("build/coverage", 0744)
-	filesToCollect := make([]string, 0)
-	for i, pkg := range packages {
-		tempCoverOuptutFile := fmt.Sprintf("build/coverage/temp_%d.out", i)
-		filesToCollect = append(filesToCollect, tempCoverOuptutFile)
+
+	arguments := []string{"test", "-cover", "-coverprofile=build/coverage/all.out"}
+	for _, pkg := range packages {
+		arguments = append(arguments, "./"+pkg.Dir)
 
 		packageTestFile := filepath.Join(pkg.Dir, fmt.Sprintf("%s_test.go", pkg.Name))
 		if _, err := os.Stat(packageTestFile); os.IsNotExist(err) {
@@ -28,6 +28,10 @@ func RunTestsWithCoverage(packages []*build.Package) error {
 		}
 	}
 
-	cmd := exec.Command("go", "test", "-cover", "-coverprofile=build/coverage/all.out", "./...")
-	return executil.RunAndCaptureOutputIfError(cmd)
+	cmd := exec.Command("go", arguments...)
+	stdOut, _, err := executil.RunAndCaptureOutputIfError(cmd)
+	if err == nil {
+		fmt.Println(stdOut)
+	}
+	return err
 }

@@ -80,5 +80,6 @@ func compileForPlatform(buildSpec BuildSpecification, platform Platform) error {
 		fmt.Sprintf("GOOS=%s", platform.OperatingSystem),
 	}...)
 
-	return executil.RunAndCaptureOutputIfError(command)
+	_, _, err := executil.RunAndCaptureOutputIfError(command)
+	return err
 }

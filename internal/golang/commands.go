@@ -2,8 +2,10 @@ package golang
 
 import (
 	"fmt"
+	"go/build"
 	"log"
 
+	"github.com/VinnieApps/cicd-toolbox/internal/arrayutil"
 	"github.com/spf13/cobra"
 )
 
@@ -79,7 +81,8 @@ func createListPackagesCommand() *cobra.Command {
 }
 
 func createRunTestsCommand() *cobra.Command {
-	return &cobra.Command{
+	var packagesToIgnore []string
+	runTestsCommand := &cobra.Command{
 		Use:   "run-tests",
 		Short: "Run all the tests and collect coverage",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -88,9 +91,20 @@ func createRunTestsCommand() *cobra.Command {
 				log.Fatal(readErr)
 			}
 
-			if err := RunTestsWithCoverage(packages); err != nil {
+			filteredPackages := make([]*build.Package, 0)
+			for _, pkg := range packages {
+				if !arrayutil.ContainsString(packagesToIgnore, pkg.Name) {
+					filteredPackages = append(filteredPackages, pkg)
+				}
+			}
+
+			if err := RunTestsWithCoverage(filteredPackages); err != nil {
 				log.Fatal(err)
 			}
 		},
 	}
+
+	runTestsCommand.Flags().StringArrayVarP(&packagesToIgnore, "ignore", "i", []string{}, "Packages to ignore")
+
+	return runTestsCommand
 }

@@ -14,7 +14,7 @@ type ExecError struct {
 }
 
 func (err *ExecError) Error() string {
-	message := fmt.Sprintf("Error while executing command:\n  '%s'", err.Command.String())
+	message := fmt.Sprintf("Error while executing command:\n  '%s'", err.Command.Path)
 	message = fmt.Sprintf("%s\nError: %s", message, err.Source.Error())
 
 	if err.StandardOutput != "" {

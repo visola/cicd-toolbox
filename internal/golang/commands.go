@@ -66,7 +66,7 @@ func createListPackagesCommand() *cobra.Command {
 		Use:   "list-packages",
 		Short: "List packages in a directory",
 		Run: func(cmd *cobra.Command, args []string) {
-			packages, readErr := ListPackages(".")
+			packages, readErr := ListPackages(".", []string{})
 			if readErr != nil {
 				log.Fatal(readErr)
 			}
@@ -79,11 +79,12 @@ func createListPackagesCommand() *cobra.Command {
 }
 
 func createRunTestsCommand() *cobra.Command {
-	return &cobra.Command{
+	var packagesToIgnore []string
+	runTestsCommand := &cobra.Command{
 		Use:   "run-tests",
 		Short: "Run all the tests and collect coverage",
 		Run: func(cmd *cobra.Command, args []string) {
-			packages, readErr := ListPackages(".")
+			packages, readErr := ListPackages(".", packagesToIgnore)
 			if readErr != nil {
 				log.Fatal(readErr)
 			}
@@ -93,4 +94,8 @@ func createRunTestsCommand() *cobra.Command {
 			}
 		},
 	}
+
+	runTestsCommand.Flags().StringArrayVarP(&packagesToIgnore, "ignore", "i", []string{}, "Packages to ignore")
+
+	return runTestsCommand
 }

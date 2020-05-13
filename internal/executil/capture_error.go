@@ -7,7 +7,7 @@ import (
 
 // RunAndCaptureOutputIfError runs the command, and if there's an error
 // capture standard out and error and generate an error with all the info
-func RunAndCaptureOutputIfError(command *exec.Cmd) error {
+func RunAndCaptureOutputIfError(command *exec.Cmd) (string, string, error) {
 	var standardOutput bytes.Buffer
 	var standardError bytes.Buffer
 
@@ -15,14 +15,17 @@ func RunAndCaptureOutputIfError(command *exec.Cmd) error {
 	command.Stdout = &standardOutput
 
 	runErr := command.Run()
+
+	stdErr := string(standardOutput.Bytes())
+	stdOut := string(standardOutput.Bytes())
 	if runErr != nil {
-		return &ExecError{
+		return stdOut, stdErr, &ExecError{
 			Command:        command,
 			Source:         runErr,
-			StandardError:  string(standardError.Bytes()),
-			StandardOutput: string(standardOutput.Bytes()),
+			StandardError:  stdErr,
+			StandardOutput: stdOut,
 		}
 	}
 
-	return nil
+	return stdOut, stdErr, nil
 }

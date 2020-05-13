@@ -23,7 +23,7 @@ var Platforms = PlatformList{
 	Platform{Architecture: "386", Extension: "", OperatingSystem: "freebsd"},
 	Platform{Architecture: "amd64", Extension: "", OperatingSystem: "freebsd"},
 
-	Platform{Architecture: "385", Extension: "", OperatingSystem: "linux"},
+	Platform{Architecture: "386", Extension: "", OperatingSystem: "linux"},
 	Platform{Architecture: "amd64", Extension: "", OperatingSystem: "linux"},
 	Platform{Architecture: "arm", Extension: "", OperatingSystem: "linux"},
 	Platform{Architecture: "arm64", Extension: "", OperatingSystem: "linux"},

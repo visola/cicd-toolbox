@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/VinnieApps/cicd-toolbox/internal/github"
 	"github.com/VinnieApps/cicd-toolbox/internal/golang"
 	"github.com/VinnieApps/cicd-toolbox/internal/semrel"
 	"github.com/VinnieApps/cicd-toolbox/internal/semver"
@@ -19,7 +18,6 @@ func main() {
 		Long:  "An unopinionated toolbox for all Continuous Integration and Delivery needs.",
 	}
 
-	rootCommand.AddCommand(github.CreateGitHubCommand())
 	rootCommand.AddCommand(golang.CreateGoCommand())
 	rootCommand.AddCommand(semrel.CreateSemanticReleaseCommand())
 	rootCommand.AddCommand(semver.CreateSemVerCommand())

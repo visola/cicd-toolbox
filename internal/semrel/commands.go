@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/VinnieApps/cicd-toolbox/internal/gh"
 	"github.com/VinnieApps/cicd-toolbox/internal/git"
-	"github.com/VinnieApps/cicd-toolbox/internal/github"
 	"github.com/VinnieApps/cicd-toolbox/internal/semver"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +21,7 @@ func CreateSemanticReleaseCommand() *cobra.Command {
 		Long:  "To learn more about Semantic Versioning: https://semver.org/",
 	}
 
-	semanticReleaseCommand.PersistentFlags().StringVarP(&github.GitHubToken, "github-token", "", "", "GitHub API Token")
+	semanticReleaseCommand.PersistentFlags().StringVarP(&gh.GitHubToken, "github-token", "", "", "GitHub API Token")
 
 	semanticReleaseCommand.AddCommand(createChangeLogCommand())
 	semanticReleaseCommand.AddCommand(createPublishReleaseCommand())
@@ -54,7 +54,7 @@ func createPublishReleaseCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			gitHubSlug := args[0]
 
-			if github.GitHubToken == "" {
+			if gh.GitHubToken == "" {
 				log.Fatal("GitHub token is required to publish a release.")
 			}
 
@@ -84,19 +84,12 @@ func createPublishReleaseCommand() *cobra.Command {
 			reference := fmt.Sprintf("refs/tags/%s", tagName)
 			log.Printf("Creating reference %s to commit -> %s (%s)\n", reference, latestCommit.Message, latestCommit.ShortSHA())
 
-			if refErr := github.CreateReference(gitHubSlug, reference, latestCommit.SHA); refErr != nil {
+			if refErr := gh.CreateReference(gitHubSlug, reference, latestCommit.SHA); refErr != nil {
 				log.Fatalf("Error while creating reference: %v", refErr.Error())
 			}
 
 			log.Println("Creating release...")
-			releaseResponse, relErr := github.CreateRelease(gitHubSlug, github.ReleaseRequestBody{
-				Body:            nextRelease.ChangeLog(),
-				IsDraft:         false,
-				Name:            tagName,
-				PreRelease:      false,
-				TagName:         tagName,
-				TargetCommitish: latestCommit.SHA,
-			})
+			releaseResponse, relErr := gh.CreateRelease(gitHubSlug, nextRelease.ChangeLog(), tagName, latestCommit.SHA)
 
 			if relErr != nil {
 				log.Fatalf("Error while creating release: %v", relErr)
@@ -107,7 +100,7 @@ func createPublishReleaseCommand() *cobra.Command {
 				log.Printf("  %s\n", file)
 			}
 
-			uploadErr := github.UploadAssetsToRelease(releaseResponse.UploadURL, filesToUpload)
+			uploadErr := gh.UploadAssetsToRelease(gitHubSlug, releaseResponse, filesToUpload)
 			if uploadErr != nil {
 				log.Fatalf("Error while uploading asset to release: %v", uploadErr)
 			}
@@ -139,7 +132,7 @@ the commit messages in the current (local) git repository.`,
 }
 
 func calculateNextRelease(gitHubSlug string) (Release, error) {
-	tags, tagsErr := github.FetchTags(gitHubSlug)
+	tags, tagsErr := gh.ListTags(gitHubSlug)
 	if tagsErr != nil {
 		log.Fatal("Error while fetching tags", tagsErr)
 	}
@@ -151,13 +144,13 @@ func calculateNextRelease(gitHubSlug string) (Release, error) {
 		latestVersionSha = ""
 	} else {
 		latestTag := tags[len(tags)-1]
-		version, parseVersionErr := semver.Parse(latestTag.TagName())
+		version, parseVersionErr := semver.Parse(gh.TagName(latestTag))
 		if parseVersionErr != nil {
 			log.Fatal("Error while parsing version.", parseVersionErr)
 		}
 
 		latestVersion = version
-		latestVersionSha = latestTag.Object.SHA
+		latestVersionSha = *latestTag.Object.SHA
 	}
 
 	commits, commitsErr := git.FetchCommits(".", latestVersionSha)

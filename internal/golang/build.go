@@ -51,14 +51,13 @@ func (buildSpec *BuildSpecification) Build() []error {
 }
 
 func compileForPlatform(buildSpec BuildSpecification, platform Platform) error {
-	os.MkdirAll(binariesDir, 0744)
+	outputDir := filepath.Join(binariesDir, fmt.Sprintf("%s_%s", platform.OperatingSystem, platform.Architecture))
+	os.MkdirAll(outputDir, 0744)
 
 	outFileName := "main"
 	if buildSpec.BaseName != "" {
 		outFileName = buildSpec.BaseName
 	}
-
-	outFileName = fmt.Sprintf("%s_%s_%s", outFileName, platform.Architecture, platform.OperatingSystem)
 
 	if platform.Extension != "" {
 		outFileName = fmt.Sprintf("%s.%s", outFileName, platform.Extension)
@@ -70,7 +69,7 @@ func compileForPlatform(buildSpec BuildSpecification, platform Platform) error {
 		commandArgs = append(commandArgs, "-ldflags", linkerArg)
 	}
 
-	commandArgs = append(commandArgs, "-o", filepath.Join(binariesDir, outFileName))
+	commandArgs = append(commandArgs, "-o", filepath.Join(outputDir, outFileName))
 	commandArgs = append(commandArgs, buildSpec.FileToBuild)
 
 	command := exec.Command("go", commandArgs...)

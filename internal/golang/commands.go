@@ -32,11 +32,6 @@ func createBuildCommand() *cobra.Command {
 			platforms := Platforms.WithArchitectures(architectures...).
 				WithOperatingSystems(operatingSystems...)
 
-			fmt.Println("Compiling binary for following platforms:")
-			for _, platform := range platforms {
-				fmt.Printf(" - '%s' '%s'\n", platform.Architecture, platform.OperatingSystem)
-			}
-
 			buildSpec := BuildSpecification{
 				BaseName:        baseName,
 				FileToBuild:     args[0],

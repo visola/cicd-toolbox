@@ -17,12 +17,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Build
-        run: go run cmd/main.go golang build --base-name cicd --os darwin --os linux --os windows --arch amd64 cmd/main.go
-
       - name: Test
         run: go run cmd/main.go golang run-tests
-      
+
       - name: Show Coverage
         run: go tool cover -func=build/coverage/all.out
 
@@ -30,6 +27,14 @@ jobs:
         run: |
           go run cmd/main.go semantic-release version-file vinnieapps/cicd-toolbox
           cat .version
+
+      - name: Build
+        run: |
+          version=$(cat .version)
+          go run cmd/main.go golang build \
+            --ldflags "-X main.version=$version" \
+            --base-name cicd \
+            --os darwin --os linux --os windows --arch amd64 cmd/main.go
 
       - name: Change Log
         run: go run cmd/main.go semantic-release change-log vinnieapps/cicd-toolbox

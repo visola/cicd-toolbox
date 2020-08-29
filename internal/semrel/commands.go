@@ -134,7 +134,7 @@ the commit messages in the current (local) git repository.`,
 func calculateNextRelease(gitHubSlug string) (Release, error) {
 	tags, tagsErr := gh.ListTags(gitHubSlug)
 	if tagsErr != nil {
-		log.Fatal("Error while fetching tags", tagsErr)
+		log.Fatal("Error while fetching tags: ", tagsErr)
 	}
 
 	var latestVersion semver.Version
@@ -146,7 +146,7 @@ func calculateNextRelease(gitHubSlug string) (Release, error) {
 		latestTag := tags[len(tags)-1]
 		version, parseVersionErr := semver.Parse(gh.TagName(latestTag))
 		if parseVersionErr != nil {
-			log.Fatal("Error while parsing version.", parseVersionErr)
+			log.Fatal("Error while parsing version: ", parseVersionErr)
 		}
 
 		latestVersion = version

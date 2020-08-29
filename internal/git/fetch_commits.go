@@ -3,6 +3,7 @@ package git
 import (
 	"errors"
 
+	"github.com/go-git/go-git/v5"
 	gogit "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
@@ -20,7 +21,7 @@ func FetchCommits(path string, afterSha string) ([]Commit, error) {
 		return nil, headErr
 	}
 
-	iterator, logErr := repo.Log(&gogit.LogOptions{From: head.Hash()})
+	iterator, logErr := repo.Log(&gogit.LogOptions{From: head.Hash(), Order: git.LogOrderCommitterTime})
 	if logErr != nil {
 		return nil, logErr
 	}

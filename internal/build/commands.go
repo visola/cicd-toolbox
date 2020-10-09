@@ -12,7 +12,18 @@ import (
 // CreateCommands creates the root Build command
 func CreateCommands() []*cobra.Command {
 	return []*cobra.Command{
+		createBuildCommand(),
 		createPackageCommand(),
+	}
+}
+
+func createBuildCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "build",
+		Short: "Build the current project",
+		Run: func(cmd *cobra.Command, args []string) {
+			introspect("./")
+		},
 	}
 }
 
